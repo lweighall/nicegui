@@ -71,6 +71,9 @@ class Storage:
     @staticmethod
     def _create_persistent_dict(id: str) -> PersistentDict:  # pylint: disable=redefined-builtin
         if Storage.redis_url:
+            # ISSUE: This creates a Redis connection on every call, even for API endpoints
+            # that don't need storage. This can exhaust Redis connection limits and cause
+            # the entire app to fail.
             return RedisPersistentDict(url=Storage.redis_url, id=id, key_prefix=Storage.redis_key_prefix)
         else:
             return FilePersistentDict(Storage.path / f'storage-{id}.json', encoding='utf-8')
